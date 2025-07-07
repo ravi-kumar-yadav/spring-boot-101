@@ -5,9 +5,7 @@ import com.ravi.spring_boot_101.entity.Employee;
 import com.ravi.spring_boot_101.service.EmployeeService;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,4 +25,19 @@ public class EmployeeRestController {
         return employeeService.findAll();
     }
 
+    @GetMapping("/employees/{employeeId}")
+    public Employee findById(@PathVariable long employeeId){
+        return employeeService.findById(employeeId);
+    }
+
+    @PostMapping("/employees")
+    public Employee addEmployee(@RequestBody Employee employee){
+        employee.setId(0);
+        return employeeService.save(employee);
+    }
+
+    @PutMapping("/employees")
+    public Employee updateEmployee(@RequestBody Employee employee){
+        return employeeService.save(employee);
+    }
 }
