@@ -1,5 +1,6 @@
 package com.ravi.spring_boot_101.rest;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.ravi.spring_boot_101.entity.Employee;
 import com.ravi.spring_boot_101.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,5 +91,44 @@ public class EmployeeRestController {
             return "Error: " + e.getMessage();
         }
         return "Success!!!";
+    }
+
+    @PatchMapping("/employees/{employeeId}")
+    public Employee patchUpdate(@RequestBody Map<String, Object> patchPayload, @PathVariable long employeeId){
+        Employee dbEmployee = employeeService.findById(employeeId);
+
+        if (dbEmployee == null){
+            throw new RuntimeException("Employee not found with id: " + employeeId);
+        }
+
+        if (patchPayload.containsKey("id")){
+            throw new RuntimeException("Patch request body cannot contain field: id");
+        }
+
+        Employee toUpdateEmployee = patchApply(dbEmployee, patchPayload);
+
+        return employeeService.save(toUpdateEmployee);
+    }
+
+    private Employee patchApply(Employee dbEmployee, Map<String, Object> patchPayload) {
+        ObjectNode employeeNode = objectMapper.convertValue(dbEmployee, ObjectNode.class);
+        ObjectNode patchNode = objectMapper.convertValue(patchPayload, ObjectNode.class);
+
+        employeeNode.setAll(patchNode);
+
+        return objectMapper.convertValue(employeeNode, Employee.class);
+    }
+
+    @DeleteMapping("/employees/{employeeId}")
+    public String deleteEmployee(@PathVariable long employeeId){
+        Employee employee = employeeService.findById(employeeId);
+
+        if (employee == null){
+            throw new RuntimeException("Employee not found for employeeId: " + employeeId);
+        }
+
+        employeeService.deleteById(employeeId);
+
+        return "Deleted Employee for employeeId: " + employeeId;
     }
 }
